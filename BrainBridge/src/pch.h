@@ -21,3 +21,4 @@
 #include <ntdsapi.h	>
 #include <cstdlib>
 #include <functional>
+#include "Definitions.h"
