@@ -189,7 +189,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Networking\WSListener.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -207,10 +206,7 @@
     <ClInclude Include="src\Core\Communicator.h" />
     <ClInclude Include="src\Core\CortexCommunicator.h" />
     <ClInclude Include="src\Core\UnrealCommunicator.h" />
-    <ClInclude Include="src\Definitions.h" />
     <ClInclude Include="src\Headset.h" />
-    <ClInclude Include="src\Networking\WSListener.h" />
-    <ClInclude Include="src\Networking\WSSession.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Systems\System.h" />
   </ItemGroup>
