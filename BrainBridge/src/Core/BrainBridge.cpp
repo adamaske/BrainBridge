@@ -45,6 +45,15 @@ int BrainBridge::Init()
 
 int BrainBridge::Run()
 {
+	int err = 0;
+	//For this we're using Cortex and Unreal, these should be called from the gui
+	auto cortex = CreateCommunicator<CortexCommunicator>("CortexCommunicator");
+	err = cortex->Init();
+
+	auto unreal = CreateCommunicator<UnrealEngineCommunicator>("UnrealEngineCommunicator");
+	err = unreal->Init();
+
+	return 0;
 	while (true) {
 		using dsec = std::chrono::duration<double>;
 		auto invFpsLimit = std::chrono::duration_cast<std::chrono::system_clock::duration>(dsec{ 1. / mAsyncTickRate });
@@ -75,14 +84,7 @@ int BrainBridge::Run()
 	}
 	return 0;
 	
-	int err = 0;
-	//For this we're using Cortex and Unreal, these should be called from the gui
-	auto cortex = CreateCommunicator<CortexCommunicator>("CortexCommunicator");
-	err = cortex->Init();
-
-	auto unreal = CreateCommunicator<UnrealEngineCommunicator>("UnrealEngineCommunicator");
-	err = unreal->Init();
-
+	
 	//We now have communicators up and running
 	
 	//The bci communicator wants a client and a server

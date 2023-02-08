@@ -18,7 +18,9 @@ public:
 	std::string mHost;
 	std::string mText;
 	//The session needs only a ioc
-	WSSession(net::io_context& ioc);
+	WSSession(net::io_context& ioc) {
+
+	};
 
 	void Run(const char* host, const char* port, char const* text) {
 	//
@@ -34,14 +36,16 @@ public:
 		beast::get_lowest_layer(mWS).expires_after(std::chrono::seconds(30));
 
 		//Make connection on the IP address we got from a lookup
-		beast::get_lowest_layer(mWS).async_connect(results, beast::bind_front_handler(&WSSession::OnConnect));
+		beast::get_lowest_layer(mWS).async_connect(result, beast::bind_front_handler(&WSSession::OnConnect));
 	};
 	void OnConnect(beast::error_code err, tcp::resolver::results_type::endpoint_type ep) {
 
 		//Turn of the tieount beacuse the websocket stream has its own timeout
 		beast::get_lowest_layer(mWS).expires_never();
 
-		//Suggested timeout for websocket
+		//Suggested timeout for websocket, this is a client
 		mWS.set_option(websocket::stream_base::timeout::suggested(beast::role_type::client));
+
+		//
 	}
 };

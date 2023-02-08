@@ -14,10 +14,10 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 class WSListener {
 public:
-	WSListener(net::io_context ioc, tcp::endpoint endpoint);
-
-	net::io_context &mIoc;
-	tcp::acceptor mAcceptor;
+	WSListener(/*net::io_context ioc, tcp::endpoint endpoint*/);
+//
+//net::io_context &mIoc;
+//tcp::acceptor mAcceptor;
 
 	void Run();
 
