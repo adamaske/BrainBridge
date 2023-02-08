@@ -1,17 +1,25 @@
 #pragma once
-#include <memory>
-#include <unordered_map>
+#include <wx/wx.h>
 
-class BrainBridge{
+class BrainBridge : public wxApp  {
 public:
     BrainBridge();
+    ~BrainBridge();
     int Init();
+    //This is the one running on the main thread
     int Run();
 private:
+    //Wx widgets overriddes
+    virtual bool OnInit();
+
+    virtual int OnExit() override;
     bool bRunning = true;
 
-    //Some sort of stack of screens
-   //stack<
+  
+    //Logging
+    //Logger
+    std::shared_ptr<class BBLogger> mLoggerFrame;
+
     template<class T>
     T* CreateCommunicator(std::string name);
     std::unordered_map<std::string, std::shared_ptr<class Communicator>> mCommunicators;
@@ -30,6 +38,25 @@ private:
     float mAsyncTickRate = 1;
     int mAsyncTickRateSeconds = 1 / mAsyncTickRate;
  
+    
+    //Windows
+    std::unordered_map<std::string, std::shared_ptr<class Window>> mWindows;
+    void InsertWindow(BBWindow* window);
+    //void OpenWindow(BBWindow* window);
+    //void CloseWindow(BBWindow* window);
+    void InsertWindow(BBWindow* window, BBWindow* parent);
+
+    //Systems
+    std::unordered_map<std::string, std::shared_ptr<class System>> mSystems;
+    //Add a system to the lowest level of application
+    void InsertSystem(System& system);
+    System* GetSystem(std::string& name);
+    //Must be run on thread
+    void HandleSystems();
+
+    //Threading
+    std::vector<std::thread> mThreads;
+
 };
 
 template<class T>

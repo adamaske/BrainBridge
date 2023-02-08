@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Communicator.h"
-#include "BrainBridge.h"
+#include "../BrainBridge.h"
 
 
 #include <boost/beast/core.hpp>

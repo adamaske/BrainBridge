@@ -97,7 +97,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)vendor\OPEN-SSL\openssl\lib;$(SolutionDir)vender\JSONCPP;%(AdditionalLibraryDirectories);$(SolutionDir)vendor\WXWIDGETS\lib/vc_x64_lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);wsock32.lib;Ws2_32.lib;fwpuclnt.lib;libsslMT.lib;libcryptoMT.lib;Crypt32.lib</AdditionalDependencies>
@@ -116,7 +116,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -135,7 +135,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)vendor\OPEN-SSL\openssl\lib;$(SolutionDir)vender\JSONCPP;%(AdditionalLibraryDirectories);$(SolutionDir)vendor\WXWIDGETS\lib/vc_x64_lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);wsock32.lib;Ws2_32.lib;fwpuclnt.lib;libsslMT.lib;libcryptoMT.lib;Crypt32.lib</AdditionalDependencies>
@@ -154,7 +154,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -169,7 +169,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\Core\BrainBridge.cpp" />
+    <ClCompile Include="src\Core\BBGUID.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\GUI\BBLogger.cpp" />
+    <ClCompile Include="src\GUI\BBWindow.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\BrainBridge.cpp" />
     <ClCompile Include="src\Core\Communicator.cpp" />
     <ClCompile Include="src\Core\CortexCommunicator.cpp" />
     <ClCompile Include="src\Core\UnrealCommunicator.cpp" />
@@ -186,14 +195,20 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\Systems\System.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Core\BrainBridge.h" />
+    <ClInclude Include="src\Core\BBGUID.h" />
+    <ClInclude Include="src\GUI\BBLogger.h" />
+    <ClInclude Include="src\GUI\BBWindow.h" />
+    <ClInclude Include="src\Logger.h" />
+    <ClInclude Include="src\BrainBridge.h" />
     <ClInclude Include="src\Core\Communicator.h" />
     <ClInclude Include="src\Core\CortexCommunicator.h" />
     <ClInclude Include="src\Core\UnrealCommunicator.h" />
     <ClInclude Include="src\Headset.h" />
     <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\Systems\System.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
