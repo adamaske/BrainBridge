@@ -1,7 +1,7 @@
 #pragma once
 #include <wx/wx.h>
 
-class BrainBridge : public wxApp  {
+class BrainBridge  {
 public:
     BrainBridge();
     ~BrainBridge();
@@ -9,10 +9,6 @@ public:
     //This is the one running on the main thread
     int Run();
 private:
-    //Wx widgets overriddes
-    virtual bool OnInit();
-
-    virtual int OnExit() override;
     bool bRunning = true;
 
   
@@ -41,10 +37,6 @@ private:
     
     //Windows
     std::unordered_map<std::string, std::shared_ptr<class Window>> mWindows;
-    void InsertWindow(BBWindow* window);
-    //void OpenWindow(BBWindow* window);
-    //void CloseWindow(BBWindow* window);
-    void InsertWindow(BBWindow* window, BBWindow* parent);
 
     //Systems
     std::unordered_map<std::string, std::shared_ptr<class System>> mSystems;

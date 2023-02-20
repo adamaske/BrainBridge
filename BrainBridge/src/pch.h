@@ -23,5 +23,7 @@
 #include <cstdlib>
 #include <functional>
 #include <thread>
-
 #include "Core/BBGUID.h";
+
+#define BB_ERROR            (-1)
+

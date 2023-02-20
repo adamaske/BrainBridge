@@ -10,6 +10,7 @@ CortexCommunicator::CortexCommunicator(BrainBridge* own) : Communicator(own) {
 }
 int CortexCommunicator::Init()
 {
+    return 1;
     int err = 0;
     auto const address = boost::asio::ip::make_address("127.0.0.1");
     auto const port = static_cast<unsigned short>(std::atoi("6868"));
@@ -41,7 +42,6 @@ int CortexCommunicator::Init()
         //    boost::beast::bind_front_handler(
         //        &CortexCommunicator::OnAccept));
     }
-
     return 1;
 }
 bool CortexCommunicator::Connect()

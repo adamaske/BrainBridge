@@ -6,13 +6,19 @@
 #include "Core/CortexCommunicator.h"
 #include "Core/UnrealCommunicator.h"
 
+#include "Logger.h"
 //GUI
-#include "GUI/BBWindow.h";
+#include "GUI/BBWindow.h"
 #include "GUI/BBLogger.h"
 
+#include "websocketpp/config/debug_asio_no_tls.hpp"
+
+// Custom logger
+#include <websocketpp/logger/syslog.hpp>
+
+#include <websocketpp/server.hpp>
 //Systems
 #include "Systems/System.h"
-wxIMPLEMENT_APP(BrainBridge);
 /*
  * To get a client id and a client secret, you must connect to your Emotiv
  * account on emotiv.com and create a Cortex app.
@@ -49,15 +55,49 @@ int BrainBridge::Init()
 
 	return true;
 }
+typedef websocketpp::server<websocketpp::config::debug_asio> server;
 
+
+// pull out the type of messages sent by our config
+typedef server::message_ptr message_ptr;
+
+// Define a callback to handle incoming messages
+void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg) {
+	std::cout << "on_message called with hdl: " << hdl.lock().get()
+		<< " and message: " << msg->get_payload()
+		<< std::endl;
+
+	try {
+		s->send(hdl, msg->get_payload(), msg->get_opcode());
+	}
+	catch (websocketpp::exception const& e) {
+		std::cout << "Echo failed because: "
+			<< "(" << e.what() << ")" << std::endl;
+	}
+}
 int BrainBridge::Run()
 {
+	//websocketpp::server<websocketpp::config::debug_asio> mserver;
+	//
+	//mserver.init_asio();
+	//mserver.set_reuse_addr(true);
+	//
+	////Register message handler
+	//mserver.set_message_handler(websocketpp::lib::bind(&on_message, &mserver, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
+	//
+	//uint64_t id = BBGUID();
+	//std::cout << id;
+	float x = 10;
+	Logger()(error) << "Adam" << x << "Aske";
+
+	return 0;
 	int err = 0;
 	//For this we're using Cortex and Unreal, these should be called from the gui
 	auto cortex = CreateCommunicator<CortexCommunicator>("CortexCommunicator");
 	err = cortex->Init();
-	if (!err) {
+	if (err == BB_ERROR) {
 		std::cout << "BrainBridge : Run : Cortex Init Error!";
+		
 	}
 	auto unreal = CreateCommunicator<UnrealEngineCommunicator>("UnrealEngineCommunicator");
 	err = unreal->Init();
@@ -160,44 +200,6 @@ int BrainBridge::Run()
 	return 1;
 }
 
-bool BrainBridge::OnInit()
-{
-	//What happends when we launch the application
-	//Init logger somehow
-
-	//What is need for thje first options
-	//Connectors
-
-	mSystems["MainMenu"] = std::make_shared<MainMenuSystem>();
-	
-	mLoggerFrame = std::make_shared<BBLogger>();
-	mLoggerFrame->Show();
-	
-	for (auto system : mSystems) {
-		system.second->Init();
-	}
-	//while (bRunning) {
-	//	//What do we do each frame ? 
-	//	mSystems[0]->Run();
-	//	//We update each system
-	//
-	//}
-
-	//We want a start window / menu window
-	//We want the brain bridge to run
-	//this->Run();
-
-	
-
-	return true;
-}
-
-int BrainBridge::OnExit()
-{
-	return 0;
-}
-
-
 
 void BrainBridge::Recv()
 {
@@ -246,13 +248,7 @@ void BrainBridge::CreateProfile(const std::string& method)
 
 }
 
-void BrainBridge::InsertWindow(BBWindow* window)
-{
-}
 
-void BrainBridge::InsertWindow(BBWindow* window, BBWindow* parent)
-{
-}
 
 void BrainBridge::InsertSystem(System& system) {
 	mSystems["System"] = std::make_shared<System>(system);
@@ -261,4 +257,8 @@ void BrainBridge::InsertSystem(System& system) {
 System* BrainBridge::GetSystem(std::string& name)
 {
 	return nullptr;
+}
+
+void BrainBridge::HandleSystems()
+{
 }
