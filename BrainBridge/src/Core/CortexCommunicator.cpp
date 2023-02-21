@@ -2,16 +2,34 @@
 #include "Communicator.h"
 #include "CortexCommunicator.h"
 #include "../BrainBridge.h"
-
-
+#include "../Networking/Session.h"
+#include "../Logger.h"
 
 CortexCommunicator::CortexCommunicator(BrainBridge* own) : Communicator(own) {
     std::cout << "Cortex Communicator Created\n";
 }
 int CortexCommunicator::Init()
 {
-    return 1;
+
+    Logger()(info) << "Cortex Communicator Init\n";
+
+    //when this is inited, what do we want to do ?
+
     int err = 0;
+    err = Connect();
+    if (err == BB_ERROR) {
+        Logger()(error) << "Cortex Connect Error\n";
+        return BB_ERROR;
+    }
+    return 1;
+    try {
+        return 1;
+    }
+    catch (std::exception& e) {
+        std::cout << e.what() << "\n";
+        return BB_ERROR;
+    }
+    return 1;
     auto const address = boost::asio::ip::make_address("127.0.0.1");
     auto const port = static_cast<unsigned short>(std::atoi("6868"));
 
@@ -46,15 +64,11 @@ int CortexCommunicator::Init()
 }
 bool CortexCommunicator::Connect()
 {
+    return BB_ERROR;
+}
+
+bool CortexCommunicator::ConnectedToCortex()
+{
     return false;
 }
 
-;
-
-CortexWindow::CortexWindow()
-{
-}
-
-CortexWindow::~CortexWindow()
-{
-}

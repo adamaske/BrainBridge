@@ -20,16 +20,20 @@
 
 //Beast websocketing
 #include <boost/beast/core.hpp>
+#include <boost/beast/ssl.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
-#include <boost/asio/bind_executor.hpp>
-#include <boost/asio/strand.hpp>
+#include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/stream.hpp>
 
-using tcp = boost::asio::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
-namespace ssl = boost::asio::ssl;               // from <boost/asio/ssl.hpp>
-namespace websocket = boost::beast::websocket;  // from <boost/beast/websocket.hpp>
+namespace beast = boost::beast;         // from <boost/beast.hpp>
+namespace http = beast::http;           // from <boost/beast/http.hpp>
+namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
+namespace net = boost::asio;            // from <boost/asio.hpp>
+namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
+using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+
 
 //Systems
 #include "Systems/System.h"
@@ -45,66 +49,69 @@ static const std::string ClientSecret = "dPb5EplnkaRFt7AVs1PuNOrTBGsp3HTEXBnUlX4
 static const std::string TrainingProfileName = "example";
 #include <WinSock2.h>
 
-// Report a failure
-//Function for reporting errors
-void
-fail2(boost::system::error_code ec, char const* what)
-{
-	std::cerr << what << ": " << ec.message() << "\n";
-}
-
-class Session {
-public:
-	tcp::socket mSocket;
-	//We want a websocket stream, of ssl type, for a tcp socket
-	websocket::stream<ssl::stream<tcp::socket&>> ws;
-	boost::asio::strand<boost::asio::io_context::executor_type> strand;
-	boost::beast::multi_buffer buffer;
-
-	//When starting a session we take ownership of a socket
-	//For secure connection a ssl context is needed
-	//Session(tcp::socket socket, ssl::context& ctx)
-	//	: mSocket(std::move(socket)), ws(mSocket, ctx), strand(ws.get_executor()) {
-	//	auto s = ws.get_executor();
-	//};
+struct Command {
+	std::string mCommandName = "Right";
+	float mActivationTreshold = 0.2f;
 };
-BrainBridge::BrainBridge()
-{
-	//Constructor	
-	
-	
 
-}
+struct TrainingProfile {
+	std::string mProfileName = "Profile";
+	std::vector<Command> mCommands;
+};
 
-BrainBridge::~BrainBridge()
-{
-	//Destructor
-}
 
-int BrainBridge::Run()
-{
+struct OptionInvoke {
+	bool bInvoked = false;
+};
+//Each option which a screen can display
+class Option {
+public:
+	std::string mOptionText = "Test option";
+	OptionInvoke Invoked() {
+		OptionInvoke i;
+		i.bInvoked = true;
+		return i;
+	};
+};
+class TestOption : public Option {
+	TestOption() {
+		mOptionText = "Testing option";
+	}
+};
+//A screen is a set of options and some text associated with it
+class Screen{
+public:
 	
-	float x = 10;
-	Logger()(error) << "Adam" << x << "Aske";
-	
-	return 0;
-	int err = 0;
-	//For this we're using Cortex and Unreal, these should be called from the gui
-	auto cortex = CreateCommunicator<CortexCommunicator>("CortexCommunicator");
-	err = cortex->Init();
-	if (err == BB_ERROR) {
-		std::cout << "BrainBridge : Run : Cortex Init Error!";
+	void DisplayOptions() {
+		for (auto opt : mOptions) {
+			//Print number
+			std::cout << "[" << opt.first << "]" << " " << opt.second->mOptionText << "\n";
+		}
+	}
+
+	void HandleInput(int i) {
+		if (mOptions.find(i) != mOptions.end()) {
+			auto inv = mOptions[i]->Invoked();
+			if (!inv.bInvoked) {
+				Logger()(error) << "Option Invoke Error\n";
+			}
+		}
+	}
+private:
+	std::map<int, std::shared_ptr<Option>> mOptions;
+};
+
+class TestScreen : public Screen {
+	TestScreen() {
 		
 	}
-	auto unreal = CreateCommunicator<UnrealEngineCommunicator>("UnrealEngineCommunicator");
-	err = unreal->Init();
-	if (!err) {
-		std::cout << "BrainBridge : Run : Cortex Init Error!";
-	}
-	return 0;
+};
+void OneFPS(){
+	//Do we want to run something once per frame
+	float asyncTickRate = 1;
 	while (true) {
 		using dsec = std::chrono::duration<double>;
-		auto invFpsLimit = std::chrono::duration_cast<std::chrono::system_clock::duration>(dsec{ 1. / mAsyncTickRate });
+		auto invFpsLimit = std::chrono::duration_cast<std::chrono::system_clock::duration>(dsec{ 1. / asyncTickRate });
 		auto m_BeginFrame = std::chrono::system_clock::now();
 		auto m_EndFrame = m_BeginFrame + invFpsLimit;
 		unsigned frame_count_per_second = 0;
@@ -130,8 +137,45 @@ int BrainBridge::Run()
 			m_EndFrame = m_BeginFrame + invFpsLimit;
 		}
 	}
+}
+BrainBridge::BrainBridge()
+{
+	//Constructor	
+}
+
+BrainBridge::~BrainBridge()
+{
+	//Destructor
+}
+int BrainBridge::Init() {
+
+	return 1;
+}
+int BrainBridge::Run()
+{
+	
+
+	Logger()(info) << "Brain Bridge Run\n";
+	std::thread t1{ OneFPS };
+	int err = 0;
+	//For this we're using Cortex and Unreal, these should be called from the gui
+	auto cortex = CreateCommunicator<CortexCommunicator>("CortexCommunicator");
+	err = cortex->Init();
+	if (err == BB_ERROR) {
+		std::cout << "BrainBridge : Run : Cortex Init Error!";
+		
+	}
+	auto unreal = CreateCommunicator<UnrealEngineCommunicator>("UnrealEngineCommunicator");
+	err = unreal->Init();
+	if (err == BB_ERROR) {
+		std::cout << "BrainBridge : Run : Cortex Init Error!";
+	}
+
+	t1.join();
 	return 0;
 	
+	
+	return 0;
 	
 	//We now have communicators up and running
 	
@@ -257,12 +301,3 @@ void BrainBridge::HandleSystems()
 {
 }
 
-struct Command {
-	std::string mCommandName = "Right";
-	float mActivationTreshold = 0.2f;
-};
-
-struct TrainingProfile {
-	std::string mProfileName = "Profile";
-	std::vector<Command> mCommands;
-};

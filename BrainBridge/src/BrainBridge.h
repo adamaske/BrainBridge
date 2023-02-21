@@ -6,6 +6,7 @@ public:
     BrainBridge();
     ~BrainBridge();
     //This is the one running on the main thread
+    int Init();
     int Run();
 private:
     bool bRunning = true;
@@ -47,7 +48,10 @@ private:
 
     //Threading
     std::vector<std::thread> mThreads;
+    
+    std::unordered_map<std::string, std::shared_ptr<Screen>> mScreens;
 
+    std::vector<std::shared_ptr<Screen>> mScreenQueue;
 };
 
 template<class T>

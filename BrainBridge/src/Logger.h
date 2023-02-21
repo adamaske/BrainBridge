@@ -1,6 +1,6 @@
 #pragma once
 enum LogLevel{ info, error};
-
+enum LogAction{ end, start, etc};
 #define INIT_LOG Logger Log()
 struct Logged {
 
@@ -17,22 +17,42 @@ public:
 		std::ostringstream stream;
 		stream << message;
 		std::cout << message;
-		std::cout << id << "\n";
 		return *this;
 	}
+	inline Logger& operator()(Logger& logger, LogLevel level);
 	inline Logger& operator()(LogLevel level);
-
+	inline Logger& operator()(LogAction action);
 	LogLevel l;
-	
+
+	void EndLoggingCurrent();
 private:
 	//static Logger* mInstance;
 	uint64_t id = BBGUID();
 	std::string mMsg;
-
+	std::vector<std::shared_ptr<Logged>> mLogged;
 };
 
-Logger& Logger::operator()(LogLevel level) {
-	std::cout << "Operator overloaded";
-	std::cout << id << "\n";
+inline Logger& Logger::operator()(Logger& logger, LogLevel level)
+{
+	// TODO: insert return statement here
+
 	return *this;
+}
+
+Logger& Logger::operator()(LogLevel level) {
+
+	return *this;
+}
+Logger& Logger::operator()(LogAction action) {
+	if (action == end) {
+		//End the logging here
+		EndLoggingCurrent();
+	}
+
+	return *this;
+}
+
+inline void Logger::EndLoggingCurrent()
+{
+	//If were already logging
 }
