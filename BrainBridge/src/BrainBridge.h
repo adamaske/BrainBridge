@@ -5,7 +5,6 @@ class BrainBridge  {
 public:
     BrainBridge();
     ~BrainBridge();
-    int Init();
     //This is the one running on the main thread
     int Run();
 private:

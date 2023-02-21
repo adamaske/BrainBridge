@@ -24,6 +24,6 @@
 #include <functional>
 #include <thread>
 #include "Core/BBGUID.h";
-
+#include <algorithm>
 #define BB_ERROR            (-1)
 

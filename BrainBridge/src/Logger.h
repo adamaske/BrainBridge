@@ -1,6 +1,11 @@
 #pragma once
 enum LogLevel{ info, error};
-#define LOG_BB() Logger DoLog()
+
+#define INIT_LOG Logger Log()
+struct Logged {
+
+};
+
 class Logger {
 public:
 	Logger();

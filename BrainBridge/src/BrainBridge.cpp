@@ -14,9 +14,23 @@
 #include "websocketpp/config/debug_asio_no_tls.hpp"
 
 // Custom logger
-#include <websocketpp/logger/syslog.hpp>
-
+#include <websocketpp/config/core.hpp>
 #include <websocketpp/server.hpp>
+
+
+//Beast websocketing
+#include <boost/beast/core.hpp>
+#include <boost/beast/websocket.hpp>
+#include <boost/beast/websocket/ssl.hpp>
+#include <boost/asio/bind_executor.hpp>
+#include <boost/asio/strand.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl/stream.hpp>
+
+using tcp = boost::asio::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
+namespace ssl = boost::asio::ssl;               // from <boost/asio/ssl.hpp>
+namespace websocket = boost::beast::websocket;  // from <boost/beast/websocket.hpp>
+
 //Systems
 #include "Systems/System.h"
 /*
@@ -29,20 +43,37 @@ static const std::string ClientSecret = "dPb5EplnkaRFt7AVs1PuNOrTBGsp3HTEXBnUlX4
 
 // The name of the training profile used for the facial expression and mental command
 static const std::string TrainingProfileName = "example";
+#include <WinSock2.h>
 
-struct Command {
-	std::string mCommandName = "Right";
-	float mActivationTreshold = 0.2f;
+// Report a failure
+//Function for reporting errors
+void
+fail2(boost::system::error_code ec, char const* what)
+{
+	std::cerr << what << ": " << ec.message() << "\n";
+}
+
+class Session {
+public:
+	tcp::socket mSocket;
+	//We want a websocket stream, of ssl type, for a tcp socket
+	websocket::stream<ssl::stream<tcp::socket&>> ws;
+	boost::asio::strand<boost::asio::io_context::executor_type> strand;
+	boost::beast::multi_buffer buffer;
+
+	//When starting a session we take ownership of a socket
+	//For secure connection a ssl context is needed
+	//Session(tcp::socket socket, ssl::context& ctx)
+	//	: mSocket(std::move(socket)), ws(mSocket, ctx), strand(ws.get_executor()) {
+	//	auto s = ws.get_executor();
+	//};
 };
-
-struct TrainingProfile {
-	std::string mProfileName = "Profile";
-	std::vector<Command> mCommands;
-};
-
 BrainBridge::BrainBridge()
 {
 	//Constructor	
+	
+	
+
 }
 
 BrainBridge::~BrainBridge()
@@ -50,46 +81,12 @@ BrainBridge::~BrainBridge()
 	//Destructor
 }
 
-int BrainBridge::Init()
-{
-
-	return true;
-}
-typedef websocketpp::server<websocketpp::config::debug_asio> server;
-
-
-// pull out the type of messages sent by our config
-typedef server::message_ptr message_ptr;
-
-// Define a callback to handle incoming messages
-void on_message(server* s, websocketpp::connection_hdl hdl, message_ptr msg) {
-	std::cout << "on_message called with hdl: " << hdl.lock().get()
-		<< " and message: " << msg->get_payload()
-		<< std::endl;
-
-	try {
-		s->send(hdl, msg->get_payload(), msg->get_opcode());
-	}
-	catch (websocketpp::exception const& e) {
-		std::cout << "Echo failed because: "
-			<< "(" << e.what() << ")" << std::endl;
-	}
-}
 int BrainBridge::Run()
 {
-	//websocketpp::server<websocketpp::config::debug_asio> mserver;
-	//
-	//mserver.init_asio();
-	//mserver.set_reuse_addr(true);
-	//
-	////Register message handler
-	//mserver.set_message_handler(websocketpp::lib::bind(&on_message, &mserver, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
-	//
-	//uint64_t id = BBGUID();
-	//std::cout << id;
+	
 	float x = 10;
 	Logger()(error) << "Adam" << x << "Aske";
-
+	
 	return 0;
 	int err = 0;
 	//For this we're using Cortex and Unreal, these should be called from the gui
@@ -146,24 +143,24 @@ int BrainBridge::Run()
 	//The user must then plug this into unreal to establish a connection from unreal to this server
 
 	//Array of the types of profiles the user can make
-	std::vector<TrainingProfile> mTrainingProfiles;
-	//Create and fill the a profile
-	TrainingProfile car;
-	car.mProfileName = "CarController";
-	car.mCommands.push_back(Command{ "CarRight", 0 });
-	//Add the profile
-	mTrainingProfiles.push_back(car);
-
-	std::cout << "Printing training profiles:\n";
-	for (int i = 0; i < mTrainingProfiles.size(); i++) {
-		std::cout << "\t" << mTrainingProfiles[i].mProfileName << "\n";
-		//std::cout << "\tCommands:\n";
-		for (int j = 0; j < mTrainingProfiles[i].mCommands.size(); j++) {
-			std::cout << "\t\t" << mTrainingProfiles[i].mCommands[j].mCommandName << " : ";
-			std::cout << mTrainingProfiles[i].mCommands[j].mActivationTreshold << "\n";
-		}
-	}
-	std::cout << "Finished printing.\n\n";
+	//std::vector<TrainingProfile> mTrainingProfiles;
+	////Create and fill the a profile
+	//TrainingProfile car;
+	//car.mProfileName = "CarController";
+	//car.mCommands.push_back(Command{ "CarRight", 0 });
+	////Add the profile
+	//mTrainingProfiles.push_back(car);
+	//
+	//std::cout << "Printing training profiles:\n";
+	//for (int i = 0; i < mTrainingProfiles.size(); i++) {
+	//	std::cout << "\t" << mTrainingProfiles[i].mProfileName << "\n";
+	//	//std::cout << "\tCommands:\n";
+	//	for (int j = 0; j < mTrainingProfiles[i].mCommands.size(); j++) {
+	//		std::cout << "\t\t" << mTrainingProfiles[i].mCommands[j].mCommandName << " : ";
+	//		std::cout << mTrainingProfiles[i].mCommands[j].mActivationTreshold << "\n";
+	//	}
+	//}
+	//std::cout << "Finished printing.\n\n";
 
 	//All the time we need to send and receive data
 
@@ -199,7 +196,6 @@ int BrainBridge::Run()
 
 	return 1;
 }
-
 
 void BrainBridge::Recv()
 {
@@ -248,8 +244,6 @@ void BrainBridge::CreateProfile(const std::string& method)
 
 }
 
-
-
 void BrainBridge::InsertSystem(System& system) {
 	mSystems["System"] = std::make_shared<System>(system);
 }
@@ -262,3 +256,13 @@ System* BrainBridge::GetSystem(std::string& name)
 void BrainBridge::HandleSystems()
 {
 }
+
+struct Command {
+	std::string mCommandName = "Right";
+	float mActivationTreshold = 0.2f;
+};
+
+struct TrainingProfile {
+	std::string mProfileName = "Profile";
+	std::vector<Command> mCommands;
+};
