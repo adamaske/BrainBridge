@@ -1,74 +1,90 @@
 #include "pch.h"
 
-#include "BrainBridge.h"
+#include "json/json.h"
 
+#include "BrainBridge.h"
 //#include "json/json.h"
 
-//#include <boost/asio.hpp>
 
 #include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
 #include <boost/beast/websocket.hpp>
+#include <boost/beast/version.hpp>
+#include <boost/asio/bind_executor.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/signal_set.hpp>
+#include <boost/asio/strand.hpp>
+#include <boost/asio/steady_timer.hpp>
+#include <boost/make_unique.hpp>
+#include <boost/config.hpp>
+using tcp = boost::asio::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
+namespace ssl = boost::asio::ssl;               // from <boost/asio/ssl.hpp>
+namespace websocket = boost::beast::websocket;  // from <boost/beast/websocket.hpp>
+namespace net = boost::asio;
+//#include <boost/asio.hpp>
+static const std::string ClientID = "1KkcmNkhTy22HiM2CMzXz03nnvGV1T7950LtMoEc";
+static const std::string ClientSecret = "dPb5EplnkaRFt7AVs1PuNOrTBGsp3HTEXBnUlX4A86p1Ev1V6OI5KMuPbOvPbpXq4AYQ9m6pNNcOnCr2KK5ETLsGyX94rJxhAHauZhQb1ADEML7jyHWhXMxd3CHcwPRS";
 
-using tcp = boost::asio::ip::tcp;
+Json::Value CortexBaseCall() {
+	Json::Value val;
+	val["id"] = 1;
+	val["jsonrpc"] = "2.0";
+	return val;
+}
 
-//Using enable_shared:from this;
+Json::Value CortexRequestAccessValue() {
+	Json::Value val = CortexBaseCall();
+	val["method"] = "requestAccess";
+	Json::Value parms;
+	parms["clientId"] = ClientID;
+	parms["clientSecret"] = ClientSecret;
+	val["params"] = parms;
+	return val;
+}
+Json::Value CortexMethodCall() {
+	
+	return Json::Value();
+}
+
+
+void RequestAccess() {
+	std::cout << "Request Access\n";
+}
 
 int main(int argc, char* argv[]) {
 
-	auto const address = boost::asio::ip::make_address("127.0.0.1");
-	auto const port = static_cast<unsigned short>(std::atoi("5800"));
-    
-	boost::asio::io_context ioc{1};
-
-	tcp::acceptor acceptor{ ioc, {address, port} };
+	//First an io context
+	net::io_context ioc;
 	
-	while (1) {
+	//We want a connection on a socket
+	net::ip::tcp::socket sock(ioc);
 
-		tcp::socket socket{ ioc };
-		acceptor.accept(socket);
+	net::const_buffer payload;
+	//
+	auto bytes_transferred = boost::asio::write(sock, payload);
 
-		std::cout << "Socket accepted\n";
+	//Connect to cortex
+	//	Request Access
+	//	Gain token
+	
+	//Connect to Unreal Engine
+	//	Set ports and ips
+	//	
+	// 
+	//Testing
+	std::unordered_map<std::string, std::function<void()>> mScreens;
+	mScreens["RequestAccess"] = std::function<void()>(RequestAccess);
+	mScreens["RequestAccess"] = []() { std::cout << "RequestAccess from labda\n"; };
+	mScreens["RequestAccess"]();
+	//auto requestAccessJson = CortexRequestAccessValue();
+	//auto stringied = requestAccessJson.asCString();
 
-		//Lock q
-		std::thread{[q{std::move(socket)}]() mutable {
-			//This thread uses one websocket
-			boost::beast::websocket::stream<tcp::socket> ws{std::move(const_cast<tcp::socket&>(q))};
-			//
-			ws.set_option(boost::beast::websocket::stream_base::decorator(
-				[](boost::beast::websocket::response_type& res) {
-					
-				}
+	//Cortex stuff
 
-			));
-			//Wait for it to accept a connection
-			ws.accept();
-			//While the connection is active
-			while (1) {
-				try
-				{
-					//buffer
-					boost::beast::flat_buffer buffer;
-					ws.read(buffer);
-					auto out = boost::beast::buffers_to_string(buffer.cdata());
-					std::cout << out << "\n";
 
-					//Echo
-					ws.write(buffer.data());
-				} //If the error code equals the closed code, the connection is over and we can break the while loop
-				catch (const boost::beast::system_error& e)
-				{
-					//Relase while loop because the connection closed
-					if (e.code() != boost::beast::websocket::error::closed) {
-						std::cout << e.code().message() << "\n";
-						break;
-					}
-				}
-			}
-		}
-		
-		}.detach();
-	}
-	ioc.run();
+	//
+
+	return 0;
 	std::cout << "Started Brain Bridge!\n";
 	BrainBridge* app = new BrainBridge();
 	//Int to store error code

@@ -38,8 +38,6 @@ namespace websocket = boost::beast::websocket;  // from <boost/beast/websocket.h
  * account on emotiv.com and create a Cortex app.
  * https://www.emotiv.com/my-account/cortex-apps/
  */
-static const std::string ClientID = "1KkcmNkhTy22HiM2CMzXz03nnvGV1T7950LtMoEc";
-static const std::string ClientSecret = "dPb5EplnkaRFt7AVs1PuNOrTBGsp3HTEXBnUlX4A86p1Ev1V6OI5KMuPbOvPbpXq4AYQ9m6pNNcOnCr2KK5ETLsGyX94rJxhAHauZhQb1ADEML7jyHWhXMxd3CHcwPRS";
 
 // The name of the training profile used for the facial expression and mental command
 static const std::string TrainingProfileName = "example";
@@ -181,8 +179,8 @@ int BrainBridge::Run()
 
 	//we want to connect to the cortex, Ask it access
 	Json::Value params;
-	params["clientId"] = ClientID;
-	params["clientSecret"] = ClientSecret;
+	//params["clientId"] = ClientID;
+	//params["clientSecret"] = ClientSecret;
 	//sendRequest("requestAccess", params);
 	//(method == "requestAccess") {
 	//	bool accessGranted = result["accessGranted"].toBool();

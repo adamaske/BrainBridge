@@ -51,10 +51,10 @@
     <ClCompile Include="src\GUI\BBLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Systems\System.cpp">
+    <ClCompile Include="src\CertificateLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CertificateLoader.cpp">
+    <ClCompile Include="src\Systems\System.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -89,10 +89,10 @@
     <ClInclude Include="src\GUI\BBLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Systems\System.h">
+    <ClInclude Include="src\CertificateLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CertificateLoader.h">
+    <ClInclude Include="src\Systems\System.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
