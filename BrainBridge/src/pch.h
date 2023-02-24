@@ -12,6 +12,7 @@
 #include <vector>
 #include <chrono>
 #include <unordered_map>
+#include <map>
 #include <memory>
 #include <future>
 #include <windows.h>
@@ -23,5 +24,7 @@
 #include <cstdlib>
 #include <functional>
 #include <thread>
-
 #include "Core/BBGUID.h";
+#include <algorithm>
+#define BB_ERROR            (-1)
+

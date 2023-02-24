@@ -6,13 +6,37 @@
 #include "Core/CortexCommunicator.h"
 #include "Core/UnrealCommunicator.h"
 
+#include "Logger.h"
 //GUI
-#include "GUI/BBWindow.h";
+#include "GUI/BBWindow.h"
 #include "GUI/BBLogger.h"
+
+#include "websocketpp/config/debug_asio_no_tls.hpp"
+
+// Custom logger
+#include <websocketpp/config/core.hpp>
+#include <websocketpp/server.hpp>
+
+
+//Beast websocketing
+#include <boost/beast/core.hpp>
+#include <boost/beast/ssl.hpp>
+#include <boost/beast/websocket.hpp>
+#include <boost/beast/websocket/ssl.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl/stream.hpp>
+
+namespace beast = boost::beast;         // from <boost/beast.hpp>
+namespace http = beast::http;           // from <boost/beast/http.hpp>
+namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
+namespace net = boost::asio;            // from <boost/asio.hpp>
+namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
+using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+
 
 //Systems
 #include "Systems/System.h"
-wxIMPLEMENT_APP(BrainBridge);
 /*
  * To get a client id and a client secret, you must connect to your Emotiv
  * account on emotiv.com and create a Cortex app.
@@ -23,6 +47,7 @@ static const std::string ClientSecret = "dPb5EplnkaRFt7AVs1PuNOrTBGsp3HTEXBnUlX4
 
 // The name of the training profile used for the facial expression and mental command
 static const std::string TrainingProfileName = "example";
+#include <WinSock2.h>
 
 struct Command {
 	std::string mCommandName = "Right";
@@ -34,40 +59,59 @@ struct TrainingProfile {
 	std::vector<Command> mCommands;
 };
 
-BrainBridge::BrainBridge()
-{
-	//Constructor	
-}
 
-BrainBridge::~BrainBridge()
-{
-	//Destructor
-}
-
-int BrainBridge::Init()
-{
-
-	return true;
-}
-
-int BrainBridge::Run()
-{
-	int err = 0;
-	//For this we're using Cortex and Unreal, these should be called from the gui
-	auto cortex = CreateCommunicator<CortexCommunicator>("CortexCommunicator");
-	err = cortex->Init();
-	if (!err) {
-		std::cout << "BrainBridge : Run : Cortex Init Error!";
+struct OptionInvoke {
+	bool bInvoked = false;
+};
+//Each option which a screen can display
+class Option {
+public:
+	std::string mOptionText = "Test option";
+	OptionInvoke Invoked() {
+		OptionInvoke i;
+		i.bInvoked = true;
+		return i;
+	};
+};
+class TestOption : public Option {
+	TestOption() {
+		mOptionText = "Testing option";
 	}
-	auto unreal = CreateCommunicator<UnrealEngineCommunicator>("UnrealEngineCommunicator");
-	err = unreal->Init();
-	if (!err) {
-		std::cout << "BrainBridge : Run : Cortex Init Error!";
+};
+//A screen is a set of options and some text associated with it
+class Screen{
+public:
+	
+	void DisplayOptions() {
+		for (auto opt : mOptions) {
+			//Print number
+			std::cout << "[" << opt.first << "]" << " " << opt.second->mOptionText << "\n";
+		}
 	}
-	return 0;
+
+	void HandleInput(int i) {
+		if (mOptions.find(i) != mOptions.end()) {
+			auto inv = mOptions[i]->Invoked();
+			if (!inv.bInvoked) {
+				Logger()(error) << "Option Invoke Error\n";
+			}
+		}
+	}
+private:
+	std::map<int, std::shared_ptr<Option>> mOptions;
+};
+
+class TestScreen : public Screen {
+	TestScreen() {
+		
+	}
+};
+void OneFPS(){
+	//Do we want to run something once per frame
+	float asyncTickRate = 1;
 	while (true) {
 		using dsec = std::chrono::duration<double>;
-		auto invFpsLimit = std::chrono::duration_cast<std::chrono::system_clock::duration>(dsec{ 1. / mAsyncTickRate });
+		auto invFpsLimit = std::chrono::duration_cast<std::chrono::system_clock::duration>(dsec{ 1. / asyncTickRate });
 		auto m_BeginFrame = std::chrono::system_clock::now();
 		auto m_EndFrame = m_BeginFrame + invFpsLimit;
 		unsigned frame_count_per_second = 0;
@@ -93,8 +137,45 @@ int BrainBridge::Run()
 			m_EndFrame = m_BeginFrame + invFpsLimit;
 		}
 	}
+}
+BrainBridge::BrainBridge()
+{
+	//Constructor	
+}
+
+BrainBridge::~BrainBridge()
+{
+	//Destructor
+}
+int BrainBridge::Init() {
+
+	return 1;
+}
+int BrainBridge::Run()
+{
+	
+
+	Logger()(info) << "Brain Bridge Run\n";
+	std::thread t1{ OneFPS };
+	int err = 0;
+	//For this we're using Cortex and Unreal, these should be called from the gui
+	auto cortex = CreateCommunicator<CortexCommunicator>("CortexCommunicator");
+	err = cortex->Init();
+	if (err == BB_ERROR) {
+		std::cout << "BrainBridge : Run : Cortex Init Error!";
+		
+	}
+	auto unreal = CreateCommunicator<UnrealEngineCommunicator>("UnrealEngineCommunicator");
+	err = unreal->Init();
+	if (err == BB_ERROR) {
+		std::cout << "BrainBridge : Run : Cortex Init Error!";
+	}
+
+	t1.join();
 	return 0;
 	
+	
+	return 0;
 	
 	//We now have communicators up and running
 	
@@ -106,24 +187,24 @@ int BrainBridge::Run()
 	//The user must then plug this into unreal to establish a connection from unreal to this server
 
 	//Array of the types of profiles the user can make
-	std::vector<TrainingProfile> mTrainingProfiles;
-	//Create and fill the a profile
-	TrainingProfile car;
-	car.mProfileName = "CarController";
-	car.mCommands.push_back(Command{ "CarRight", 0 });
-	//Add the profile
-	mTrainingProfiles.push_back(car);
-
-	std::cout << "Printing training profiles:\n";
-	for (int i = 0; i < mTrainingProfiles.size(); i++) {
-		std::cout << "\t" << mTrainingProfiles[i].mProfileName << "\n";
-		//std::cout << "\tCommands:\n";
-		for (int j = 0; j < mTrainingProfiles[i].mCommands.size(); j++) {
-			std::cout << "\t\t" << mTrainingProfiles[i].mCommands[j].mCommandName << " : ";
-			std::cout << mTrainingProfiles[i].mCommands[j].mActivationTreshold << "\n";
-		}
-	}
-	std::cout << "Finished printing.\n\n";
+	//std::vector<TrainingProfile> mTrainingProfiles;
+	////Create and fill the a profile
+	//TrainingProfile car;
+	//car.mProfileName = "CarController";
+	//car.mCommands.push_back(Command{ "CarRight", 0 });
+	////Add the profile
+	//mTrainingProfiles.push_back(car);
+	//
+	//std::cout << "Printing training profiles:\n";
+	//for (int i = 0; i < mTrainingProfiles.size(); i++) {
+	//	std::cout << "\t" << mTrainingProfiles[i].mProfileName << "\n";
+	//	//std::cout << "\tCommands:\n";
+	//	for (int j = 0; j < mTrainingProfiles[i].mCommands.size(); j++) {
+	//		std::cout << "\t\t" << mTrainingProfiles[i].mCommands[j].mCommandName << " : ";
+	//		std::cout << mTrainingProfiles[i].mCommands[j].mActivationTreshold << "\n";
+	//	}
+	//}
+	//std::cout << "Finished printing.\n\n";
 
 	//All the time we need to send and receive data
 
@@ -159,45 +240,6 @@ int BrainBridge::Run()
 
 	return 1;
 }
-
-bool BrainBridge::OnInit()
-{
-	//What happends when we launch the application
-	//Init logger somehow
-
-	//What is need for thje first options
-	//Connectors
-
-	mSystems["MainMenu"] = std::make_shared<MainMenuSystem>();
-	
-	mLoggerFrame = std::make_shared<BBLogger>();
-	mLoggerFrame->Show();
-	
-	for (auto system : mSystems) {
-		system.second->Init();
-	}
-	//while (bRunning) {
-	//	//What do we do each frame ? 
-	//	mSystems[0]->Run();
-	//	//We update each system
-	//
-	//}
-
-	//We want a start window / menu window
-	//We want the brain bridge to run
-	//this->Run();
-
-	
-
-	return true;
-}
-
-int BrainBridge::OnExit()
-{
-	return 0;
-}
-
-
 
 void BrainBridge::Recv()
 {
@@ -246,14 +288,6 @@ void BrainBridge::CreateProfile(const std::string& method)
 
 }
 
-void BrainBridge::InsertWindow(BBWindow* window)
-{
-}
-
-void BrainBridge::InsertWindow(BBWindow* window, BBWindow* parent)
-{
-}
-
 void BrainBridge::InsertSystem(System& system) {
 	mSystems["System"] = std::make_shared<System>(system);
 }
@@ -262,3 +296,8 @@ System* BrainBridge::GetSystem(std::string& name)
 {
 	return nullptr;
 }
+
+void BrainBridge::HandleSystems()
+{
+}
+

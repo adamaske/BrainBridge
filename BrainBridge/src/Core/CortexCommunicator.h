@@ -16,12 +16,6 @@ public:
     virtual int Init() override;
     virtual bool Connect() override;
     
-};
-
-class CortexWindow : public wxFrame {
-public:
-    CortexWindow();
-    ~CortexWindow();
-
-
+    bool ConnectedToCortex();
+    std::shared_ptr<Session> mSession;
 };

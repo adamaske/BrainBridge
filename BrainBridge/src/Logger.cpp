@@ -3,4 +3,6 @@
 
 Logger::Logger()
 {
+	//mInstance = this;
 }
+
