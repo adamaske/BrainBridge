@@ -66,6 +66,7 @@ struct OptionInvoke {
 //Each option which a screen can display
 class Option {
 public:
+
 	std::string mOptionText = "Test option";
 	OptionInvoke Invoked() {
 		OptionInvoke i;
@@ -81,7 +82,13 @@ class TestOption : public Option {
 //A screen is a set of options and some text associated with it
 class Screen{
 public:
-	
+	Screen() {
+		//Test screen
+		mOptions[0] = std::make_shared<TestOption>();
+		int input = 0;
+
+
+	}
 	void DisplayOptions() {
 		for (auto opt : mOptions) {
 			//Print number
@@ -93,8 +100,11 @@ public:
 		if (mOptions.find(i) != mOptions.end()) {
 			auto inv = mOptions[i]->Invoked();
 			if (!inv.bInvoked) {
-				Logger()(error) << "Option Invoke Error\n";
+				Logger()(error) << "Option Invoke Returned False\n";
 			}
+		}
+		else {
+			Logger()(error) << "That is not an option!\n";
 		}
 	}
 private:
@@ -153,7 +163,10 @@ int BrainBridge::Init() {
 }
 int BrainBridge::Run()
 {
-	
+
+	auto sc = std::make_shared<Screen>();
+	sc->DisplayOptions();
+	return 0;
 
 	Logger()(info) << "Brain Bridge Run\n";
 	std::thread t1{ OneFPS };
@@ -174,8 +187,6 @@ int BrainBridge::Run()
 	t1.join();
 	return 0;
 	
-	
-	return 0;
 	
 	//We now have communicators up and running
 	

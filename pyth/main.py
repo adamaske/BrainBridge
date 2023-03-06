@@ -1,51 +1,21 @@
-# This is a sample Python script.
-#!/usr/bin/env python
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import matplotlib.pyplot as plt
+import numpy as np
+import openbci as ob
+from openbci import cyton as bci
 
-import asyncio
-import websockets
-import json
-import socket
-import socketserver
+from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds, BrainFlowPresets
+def plot():
+    x = np.linspace(0, 20, 100)  # Create a list of evenly-spaced numbers over the range
+    plt.plot(x, np.sin(x))       # Plot the sine of each x point
+    plt.show()                   # Display the plot
+    
+def hello_world():
+    print('Hello World!')
 
-async def hello():
-    async with websockets.connect("wss://localhost:6868") as websocket:
-        await websocket.send("Hei")
-        await websocket.recv()
+def main():
+    BoardShim.enable_dev_board_logger()
+    params = BrainFlowInputParams()
 
-async def echo(websocket):
-    async for message in websocket:
-        await websocket.send(message)
-
-async def main():
-    async with websockets.serve(echo, "localhost", 6868):
-        await asyncio.Future()
-
-class Option:
-    text = "A generic option"
-    index = 0
-class Options:
-    x = "Adama"
-
-def MainMenu():
-    print("Welcome to BrainBridge")
-
-def ConnectToCortex():
-    print("Connecting to cortex")
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    ConnectToCortex()
-    while 1:
-        #print what we need
-        MainMenu()
-
-        x = input()
-
-
-def baseCall():
-    x = {"id": 1, "jsonrpc": "2.0"}
-    return x
-
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    hello_world()
+    plot()

@@ -4,6 +4,7 @@
 #include "../BrainBridge.h"
 #include "../Networking/Session.h"
 #include "../Logger.h"
+#include "Json/json.h"
 
 CortexCommunicator::CortexCommunicator(BrainBridge* own) : Communicator(own) {
     std::cout << "Cortex Communicator Created\n";
@@ -70,5 +71,17 @@ bool CortexCommunicator::Connect()
 bool CortexCommunicator::ConnectedToCortex()
 {
     return false;
+}
+
+void CortexCommunicator::RequestAccess()
+{
+    Json::Value val;
+    val["id"] = "1";
+    val["jsonrpc"] = "2.0";
+    val["method"] = "requestAccess";
+}
+
+void CortexCommunicator::RequestAccess_Response()
+{
 }
 

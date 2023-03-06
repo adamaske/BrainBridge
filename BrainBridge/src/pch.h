@@ -19,12 +19,12 @@
 #include <winsock2.h>
 #include <mstcpip.h	>
 #include <ws2tcpip.h>
-#include <rpc.h		>
-#include <ntdsapi.h	>
+#include <rpc.h>
+#include <ntdsapi.h>
 #include <cstdlib>
 #include <functional>
 #include <thread>
-#include "Core/BBGUID.h";
+#include "Core/BBGUID.h"
 #include <algorithm>
 #define BB_ERROR            (-1)
 

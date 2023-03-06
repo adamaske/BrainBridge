@@ -18,7 +18,9 @@ namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 //Using enable shared from this allows for this class to create a shared pointer to itself and expand its lifetime
-class Session : public std::enable_shared_from_this<Session> {
+class Session : public std::enable_shared_from_this<Session>
+{
+	
 	//We need the io context
 	net::io_context& mIoc;
 	//a tcp reslover
@@ -31,6 +33,8 @@ class Session : public std::enable_shared_from_this<Session> {
 	std::string mText;
 	std::string mEndpoint;
 public:
+	Session();
+
 	void run() {
 	};
 };

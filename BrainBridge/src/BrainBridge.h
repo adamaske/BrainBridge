@@ -49,7 +49,7 @@ private:
     //Threading
     std::vector<std::thread> mThreads;
     
-    std::unordered_map<std::string, std::shared_ptr<Screen>> mScreens;
+    std::unordered_map<std::string, std::shared_ptr<class Screen>> mScreens;
 
     std::vector<std::shared_ptr<Screen>> mScreenQueue;
 };

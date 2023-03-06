@@ -3,7 +3,7 @@
 #include "BrainBridge.h"
 
 #include "json/json.h"
-
+#include "Networking/Session.h"
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
@@ -25,8 +25,12 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 class CortexSession : public Session {
 public:
-	CortexSession();
-	~CortexSession();
+	CortexSession() {
+
+	};
+	~CortexSession() {
+
+	};
 
 private:
 
@@ -75,6 +79,9 @@ int main(int argc, char* argv[]) {
 
 	std::cout << "Started Brain Bridge!\n";
 	BrainBridge* app = new BrainBridge();
+	std::cout << "Welcome to Brian Bridge!\nThis is a simplified version.\n";
+	std::cout << "First you need to connect to the Cortex API.\n";
+
 	//Int to store error code
 	int err = 0;
 	err = app->Init();
@@ -87,6 +94,9 @@ int main(int argc, char* argv[]) {
 	}
 	delete app;
 
+	while (true) {
+
+	}
 
 	return 0;
 

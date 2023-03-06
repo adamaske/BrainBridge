@@ -17,5 +17,10 @@ public:
     virtual bool Connect() override;
     
     bool ConnectedToCortex();
-    std::shared_ptr<Session> mSession;
+    std::shared_ptr<class Session> mSession;
+
+    void RequestAccess();
+    void RequestAccess_Response();
+
+    //
 };
